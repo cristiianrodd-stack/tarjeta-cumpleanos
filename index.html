@@ -27,6 +27,11 @@
       position: relative;
     }
 
+    /* Ocultar el elemento de video completamente para que solo actúe como reproductor de audio */
+    #bgVideo {
+      display: none;
+    }
+
     /* Lienzo para fuegos artificiales y destellos */
     #canvas {
       position: absolute;
@@ -186,6 +191,13 @@
 </head>
 <body>
 
+  <!-- Elemento de video oculto para reproducir el audio del video de TikTok -->
+  <video id="bgVideo" loop>
+    <!-- CAMBIA 'video-tiktok.mp4' por el nombre exacto de tu archivo de video -->
+    <source src="video-de-cumpleaños.mp4" type="video/mp4">
+    Tu navegador no soporta video.
+  </video>
+
   <!-- Lienzo para animaciones -->
   <canvas id="canvas"></canvas>
 
@@ -285,6 +297,10 @@
       const openBtn = document.getElementById('openBtn');
       const photoCard = document.getElementById('photoCard');
       const titleContainer = document.getElementById('titleContainer');
+      const bgVideo = document.getElementById('bgVideo');
+
+      // Reproducir el video (el cual estará oculto y solo se escuchará el audio)
+      bgVideo.play().catch(error => console.log("Video play blocked:", error));
 
       openBtn.style.display = 'none';
       envelope.classList.add('open');
