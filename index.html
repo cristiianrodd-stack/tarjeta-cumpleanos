@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¡Feliz Cumpleaños!</title>
+  <!-- Fuente elegante importada desde Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #08080a;
+      color: #f4f4f6;
+      font-family: 'Montserrat', sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Lienzo para fuegos artificiales y destellos */
+    #canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Título superior elegante */
+    .title-container {
+      position: absolute;
+      top: 6vh;
+      width: 100%;
+      text-align: center;
+      z-index: 10;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .title-container.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .title-container h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 6vw, 4.2rem);
+      font-weight: 600;
+      color: #f3e5ab;
+      text-shadow: 0 2px 20px rgba(243, 229, 171, 0.25);
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+    }
+    .title-divider {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #f3e5ab, transparent);
+      margin: 0 auto;
+    }
+
+    /* Envoltorio principal de la tarjeta */
+    .card-wrapper {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    /* Sobre elegante y minimalista */
+    .envelope {
+      width: 300px;
+      height: 190px;
+      background-color: #1a1a20;
+      border: 1px solid rgba(243, 229, 171, 0.2);
+      position: relative;
+      border-radius: 4px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.4s ease, opacity 0.8s ease;
+    }
+    .envelope:hover {
+      transform: scale(1.02);
+      border-color: rgba(243, 229, 171, 0.4);
+    }
+    /* Tapa del sobre */
+    .envelope::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 150px solid transparent;
+      border-right: 150px solid transparent;
+      border-top: 105px solid #24242c;
+      transform-origin: top;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 3;
+    }
+
+    /* Botón Abrir formal */
+    .open-btn {
+      position: absolute;
+      z-index: 4;
+      padding: 10px 28px;
+      background: transparent;
+      color: #f3e5ab;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: 1px solid #f3e5ab;
+      border-radius: 2px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+    .open-btn:hover {
+      background: #f3e5ab;
+      color: #08080a;
+      box-shadow: 0 0 15px rgba(243, 229, 171, 0.3);
+    }
+
+    /* Foto emergente con estilo de tarjeta fotográfica */
+    .photo-card {
+      position: absolute;
+      width: clamp(280px, 42vw, 360px);
+      max-height: 55vh;
+      background-color: #121216;
+      border: 1px solid rgba(243, 229, 171, 0.25);
+      padding: 14px 14px 24px 14px;
+      border-radius: 6px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      transform: scale(0.3) translateY(80px);
+      transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 6;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .photo-card.show {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+    .photo-card img {
+      width: 100%;
+      height: auto;
+      max-height: 48vh;
+      object-fit: contain;
+      border-radius: 3px;
+    }
+
+    /* Estado de apertura */
+    .envelope.open::before {
+      transform: rotateX(180deg);
+    }
+    .envelope.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lienzo para animaciones discretas y elegantes -->
+  <canvas id="canvas"></canvas>
+
+  <!-- Título superior formal -->
+  <div class="title-container" id="titleContainer">
+    <h1>Feliz Cumpleaños</h1>
+    <div class="title-divider"></div>
+  </div>
+
+  <!-- Contenedor central -->
+  <div class="card-wrapper">
+    <!-- Sobre -->
+    <div class="envelope" id="envelope" onclick="openEnvelope()">
+      <button class="open-btn" id="openBtn">Abrir</button>
+    </div>
+
+    <!-- Carta con Foto -->
+    <div class="photo-card" id="photoCard">
+      <!-- CAMBIA AQUÍ EL NOMBRE DE TU ARCHIVO DE FOTO -->
+      <img id="birthdayPhoto" src="foto-de-cumpleaños-editada.jpg" alt="Foto de Cumpleaños">
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    let particles = [];
+    let isCelebrating = false;
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.radius = Math.random() * 2 + 0.8;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 5 + 0.8;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.alpha = 1;
+        this.decay = Math.random() * 0.015 + 0.008;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.04;
+        this.alpha -= this.decay;
+      }
+    }
+
+    function createFirework() {
+      const x = Math.random() * (canvas.width * 0.8) + canvas.width * 0.1;
+      const y = Math.random() * (canvas.height * 0.4) + canvas.height * 0.15;
+      // Tonos dorados, champán y blancos más sobrios y elegantes
+      const colors = ['#f3e5ab', '#e6c56b', '#ffffff', '#dfbe6f', '#f9f3d5'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      for (let i = 0; i < 35; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function animate() {
+      ctx.fillStyle = 'rgba(8, 8, 10, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (isCelebrating && Math.random() < 0.06) {
+        createFirework();
+      }
+
+      particles.forEach((p, index) => {
+        p.update();
+        p.draw();
+        if (p.alpha <= 0) particles.splice(index, 1);
+      });
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    function openEnvelope() {
+      const envelope = document.getElementById('envelope');
+      const openBtn = document.getElementById('openBtn');
+      const photoCard = document.getElementById('photoCard');
+      const titleContainer = document.getElementById('titleContainer');
+
+      openBtn.style.display = 'none';
+      envelope.classList.add('open');
+
+      setTimeout(() => {
+        envelope.classList.add('fade-out');
+        photoCard.classList.add('show');
+        titleContainer.classList.add('visible');
+        isCelebrating = true;
+      }, 500);
+    }
+  </script>
+</body>
+</html>
